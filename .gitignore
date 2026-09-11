@@ -1,0 +1,25 @@
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Database files
+*.db
+*.sqlite3
+
+# Uploads directory (retain folder structure if needed)
+uploads/*
+!uploads/.gitkeep
+
+# IDE / OS settings
+.vscode/
+.idea/
+.DS_Store
+*.log

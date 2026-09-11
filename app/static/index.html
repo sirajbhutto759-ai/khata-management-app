@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digital Khata Book</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+  <div id="app-root">
+
+    <!-- ========================================== -->
+    <!-- 1. AUTHENTICATION WRAPPER                  -->
+    <!-- ========================================== -->
+    <div id="auth-container" class="auth-wrapper" style="display: flex;">
+      <div class="auth-card">
+        <div class="auth-brand">
+          <div class="logo-icon">DKB</div>
+          <h2 data-i18n="appName">Digital Khata Book</h2>
+          <p data-i18n="subName">Digital Ledger & Accounting</p>
+        </div>
+
+        <!-- Login Form -->
+        <form id="form-login" onsubmit="handleLogin(event)">
+          <h3 style="margin-bottom: 1.25rem; font-weight: 700; font-size: 1.1rem;" data-i18n="loginTitle">Login to your
+            Khata</h3>
+
+          <div class="form-group">
+            <label data-i18n="emailLabel">Email Address</label>
+            <input type="email" id="login-email" class="form-control" placeholder="name@business.com" required>
+          </div>
+
+          <div class="form-group">
+            <label data-i18n="passwordLabel">Password</label>
+            <input type="password" id="login-password" class="form-control" placeholder="••••••••" required>
+          </div>
+
+          <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; font-size: 0.8125rem;">
+            <a href="#" onclick="showAuthModal('forgot')" style="color: var(--primary); text-decoration: none;"
+              data-i18n="forgotPwdLink">Forgot Password?</a>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="loginBtn">Sign In</button>
+
+          <div style="margin-top: 1.5rem; text-align: center; font-size: 0.85rem; color: var(--text-muted);">
+            <span data-i18n="noAccount">Don't have an account?</span>
+            <a href="#" onclick="showAuthModal('register')"
+              style="color: var(--primary); font-weight: 600; text-decoration: none;" data-i18n="registerBtn">Register
+              Business</a>
+          </div>
+        </form>
+
+        <!-- Register Form -->
+        <form id="form-register" onsubmit="handleRegister(event)" style="display: none;">
+          <h3 style="margin-bottom: 1.25rem; font-weight: 700; font-size: 1.1rem;" data-i18n="registerTitle">Create
+            Business Account</h3>
+
+          <div class="form-group">
+            <label data-i18n="businessNameLabel">Business Name</label>
+            <input type="text" id="reg-business-name" class="form-control" placeholder="e.g. Digital Khata Store"
+              required>
+          </div>
+
+          <div class="form-group">
+            <label data-i18n="ownerNameLabel">Owner Name</label>
+            <input type="text" id="reg-owner-name" class="form-control" placeholder="e.g. Muhammad Siraj" required>
+          </div>
+
+          <div class="form-group">
+            <label data-i18n="emailLabel">Email Address</label>
+            <input type="email" id="reg-email" class="form-control" placeholder="name@business.com" required>
+          </div>
+
+          <div class="form-group">
+            <label data-i18n="phoneLabel">Phone Number</label>
+            <input type="text" id="reg-phone" class="form-control" placeholder="03001234567">
+          </div>
+
+          <div class="form-group">
+            <label data-i18n="passwordLabel">Password</label>
+            <input type="password" id="reg-password" class="form-control" placeholder="Minimum 6 characters" required
+              minlength="6">
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="registerBtn">Register
+            Business</button>
+
+          <div style="margin-top: 1.5rem; text-align: center; font-size: 0.85rem; color: var(--text-muted);">
+            <span data-i18n="haveAccount">Already have an account?</span>
+            <a href="#" onclick="showAuthModal('login')"
+              style="color: var(--primary); font-weight: 600; text-decoration: none;" data-i18n="loginBtn">Sign In</a>
+          </div>
+        </form>
+
+        <!-- Forgot Password Form -->
+        <form id="form-forgot" onsubmit="handleForgotPassword(event)" style="display: none;">
+          <h3 style="margin-bottom: 1.25rem; font-weight: 700; font-size: 1.1rem;" data-i18n="forgotPasswordTitle">Reset
+            Password</h3>
+
+          <div class="form-group">
+            <label data-i18n="emailLabel">Email Address</label>
+            <input type="email" id="forgot-email" class="form-control" placeholder="name@business.com" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Generate Reset Instructions</button>
+
+          <div style="margin-top: 1.5rem; text-align: center; font-size: 0.85rem;">
+            <a href="#" onclick="showAuthModal('login')" style="color: var(--text-muted); text-decoration: none;"
+              data-i18n="cancel">Cancel</a>
+          </div>
+        </form>
+
+      </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- 2. MAIN APPLICATION CONTAINER              -->
+    <!-- ========================================== -->
+    <div id="app-container" style="display: none; width: 100%;">
+
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="brand-logo">DKB</div>
+          <div class="brand-title">
+            <div data-i18n="appName">Digital Khata Book</div>
+            <span data-i18n="subName">Ledger & Accounting</span>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a id="nav-dashboard" class="nav-item active" onclick="switchTab('dashboard')">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span data-i18n="dashboard">Dashboard</span>
+          </a>
+
+          <a id="nav-customers" class="nav-item" onclick="switchTab('customers')">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 010 7.75"></path>
+            </svg>
+            <span data-i18n="customers">Customers</span>
+          </a>
+
+          <a id="nav-transactions" class="nav-item" onclick="switchTab('transactions')">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <line x1="12" y1="1" x2="12" y2="23"></line>
+              <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"></path>
+            </svg>
+            <span data-i18n="transactions">Khata / Udhaar</span>
+          </a>
+
+          <a id="nav-expenses" class="nav-item" onclick="switchTab('expenses')">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M21.21 15.89A10 10 0 118 2.83"></path>
+              <path d="M22 12A10 10 0 0012 2v10z"></path>
+            </svg>
+            <span data-i18n="expenses">Expenses</span>
+          </a>
+
+          <a id="nav-reports" class="nav-item" onclick="switchTab('reports')">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            <span data-i18n="reports">Reports</span>
+          </a>
+
+          <a id="nav-settings" class="nav-item" onclick="switchTab('settings')">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path
+                d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z">
+              </path>
+            </svg>
+            <span data-i18n="settings">Settings</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="user-pill">
+            <div id="user-avatar-display" class="user-avatar">K</div>
+            <div class="user-info">
+              <div id="user-name-display" class="user-name">Owner</div>
+              <div id="user-business-display" class="user-role">Shop Keeper</div>
+            </div>
+            <button class="icon-btn" onclick="logoutUser()" title="Logout" style="width: 32px; height: 32px;">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Wrapper -->
+      <div class="main-wrapper">
+
+        <!-- Topbar Header -->
+        <header class="topbar">
+          <div class="topbar-left">
+            <div class="global-search">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" placeholder="Search customer, amount..." oninput="handleGlobalSearch(this.value)">
+            </div>
+          </div>
+
+          <div class="topbar-actions">
+            <button id="lang-toggle-btn" class="lang-btn"
+              onclick="setLanguage(currentLang === 'en' ? 'ur' : 'en')">اردو</button>
+
+            <button class="icon-btn" onclick="toggleNotificationsDropdown()">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 01-3.46 0"></path>
+              </svg>
+              <span id="notif-badge" class="badge" style="display: none;">0</span>
+            </button>
+
+            <!-- Notifications Dropdown -->
+            <div id="notif-dropdown"
+              style="display: none; position: absolute; top: 56px; right: 60px; width: 320px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); z-index: 50;">
+              <div
+                style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 700; font-size: 0.875rem;">Notifications</span>
+                <button class="btn btn-sm btn-outline" onclick="markAllNotificationsRead()"
+                  style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">Mark all read</button>
+              </div>
+              <div id="notif-list" style="max-height: 280px; overflow-y: auto;"></div>
+            </div>
+          </div>
+        </header>
+
+        <!-- Content Body View Container -->
+        <main id="main-content-view" class="content-body"></main>
+      </div>
+
+      <!-- Mobile Bottom Navigation Bar -->
+      <nav class="mobile-nav">
+        <a id="mobile-nav-dashboard" class="mobile-nav-item active" onclick="switchTab('dashboard')">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span data-i18n="dashboard">Dashboard</span>
+        </a>
+
+        <a id="mobile-nav-customers" class="mobile-nav-item" onclick="switchTab('customers')">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+          </svg>
+          <span data-i18n="customers">Customers</span>
+        </a>
+
+        <a id="mobile-nav-transactions" class="mobile-nav-item" onclick="switchTab('transactions')">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="12" y1="1" x2="12" y2="23"></line>
+            <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"></path>
+          </svg>
+          <span data-i18n="transactions">Khata</span>
+        </a>
+
+        <a id="mobile-nav-expenses" class="mobile-nav-item" onclick="switchTab('expenses')">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M21.21 15.89A10 10 0 118 2.83"></path>
+            <path d="M22 12A10 10 0 0012 2v10z"></path>
+          </svg>
+          <span data-i18n="expenses">Expenses</span>
+        </a>
+
+        <a id="mobile-nav-reports" class="mobile-nav-item" onclick="switchTab('reports')">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span data-i18n="reports">Reports</span>
+        </a>
+
+        <a id="mobile-nav-settings" class="mobile-nav-item" onclick="switchTab('settings')">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          <span data-i18n="settings">Settings</span>
+        </a>
+      </nav>
+    </div>
+
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- MODALS                                     -->
+  <!-- ========================================== -->
+
+  <!-- Add / Edit Customer Modal -->
+  <div id="modal-customer" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-customer-title" data-i18n="addCustomer">Add Customer</h3>
+        <button class="icon-btn" onclick="closeModal('modal-customer')">&times;</button>
+      </div>
+      <form onsubmit="handleSaveCustomer(event)">
+        <div class="modal-body">
+          <input type="hidden" id="customer-id">
+
+          <div class="form-group">
+            <label data-i18n="customerName">Customer Name *</label>
+            <input type="text" id="customer-name" class="form-control" placeholder="e.g. Tariq Khan" required>
+          </div>
+
+          <div class="form-group">
+            <label data-i18n="phoneLabel">Phone Number</label>
+            <input type="text" id="customer-phone" class="form-control" placeholder="03001234567">
+          </div>
+
+          <div class="form-group">
+            <label data-i18n="address">Address</label>
+            <input type="text" id="customer-address" class="form-control" placeholder="Shop #12, Main Market">
+          </div>
+
+          <div class="form-group">
+            <label data-i18n="openingBalance">Opening Balance (PKR)</label>
+            <input type="number" step="0.01" id="customer-opening-balance" class="form-control" value="0">
+          </div>
+
+          <div class="form-group">
+            <label data-i18n="notes">Notes / Details</label>
+            <textarea id="customer-notes" class="form-control" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modal-customer')"
+            data-i18n="cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" data-i18n="save">Save Customer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Udhaar / Payment Modal -->
+  <div id="modal-tx" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-tx-title" data-i18n="addTransaction">Add Transaction / Khata</h3>
+        <button class="icon-btn" onclick="closeModal('modal-tx')">&times;</button>
+      </div>
+      <form onsubmit="handleSaveTransaction(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label data-i18n="customerName">Select Customer *</label>
+            <select id="tx-customer-id" class="form-control" required></select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label data-i18n="txType">Transaction Type *</label>
+              <select id="tx-type" class="form-control" required>
+                <option value="credit" data-i18n="creditType">Udhaar (Credit)</option>
+                <option value="debit" data-i18n="debitType">Payment Received (Debit)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label data-i18n="amount">Amount (PKR) *</label>
+              <input type="number" step="0.01" id="tx-amount" class="form-control" placeholder="5000" required min="1">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label data-i18n="date">Date</label>
+              <input type="date" id="tx-date" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label data-i18n="paymentMethod">Payment Method</label>
+              <select id="tx-payment-method" class="form-control">
+                <option value="Cash">Cash</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="JazzCash">JazzCash</option>
+                <option value="Easypaisa">Easypaisa</option>
+                <option value="NayaPay">NayaPay</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label data-i18n="description">Description / Item Details</label>
+            <textarea id="tx-description" class="form-control" rows="2" placeholder="e.g. 5 bags of sugar"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label data-i18n="receipt">Receipt / Attachment</label>
+            <input type="file" id="tx-receipt-file" class="form-control" accept="image/*,.pdf">
+            <small style="color: var(--text-muted); font-size: 0.75rem;">Attach receipt image or PDF (optional)</small>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modal-tx')"
+            data-i18n="cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" data-i18n="save">Save Transaction</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Expense Modal -->
+  <div id="modal-expense" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 data-i18n="addExpense">Add Expense</h3>
+        <button class="icon-btn" onclick="closeModal('modal-expense')">&times;</button>
+      </div>
+      <form onsubmit="handleSaveExpense(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label data-i18n="expenseTitle">Expense Title *</label>
+            <input type="text" id="exp-title" class="form-control" placeholder="e.g. Shop Rent" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label data-i18n="category">Category</label>
+              <select id="exp-category" class="form-control">
+                <option value="Rent">Rent</option>
+                <option value="Electricity">Electricity</option>
+                <option value="Salary">Salary</option>
+                <option value="Transport">Transport</option>
+                <option value="Food">Food</option>
+                <option value="Internet">Internet</option>
+                <option value="Purchases">Purchases</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label data-i18n="amount">Amount (PKR) *</label>
+              <input type="number" step="0.01" id="exp-amount" class="form-control" placeholder="15000" required
+                min="1">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label data-i18n="date">Date</label>
+              <input type="date" id="exp-date" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label data-i18n="paymentMethod">Payment Method</label>
+              <select id="exp-payment-method" class="form-control">
+                <option value="Cash">Cash</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="JazzCash">JazzCash</option>
+                <option value="Easypaisa">Easypaisa</option>
+                <option value="NayaPay">NayaPay</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label data-i18n="description">Notes / Details</label>
+            <textarea id="exp-description" class="form-control" rows="2"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modal-expense')"
+            data-i18n="cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" data-i18n="save">Save Expense</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Customer Statement Modal -->
+  <div id="modal-statement" class="modal-overlay">
+    <div class="modal-content statement-modal">
+      <div class="modal-header">
+        <h3 data-i18n="customerStatementTitle">Customer Account Statement</h3>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-sm btn-primary" onclick="window.print()" data-i18n="printStatement">Print</button>
+          <button class="icon-btn" onclick="closeModal('modal-statement')">&times;</button>
+        </div>
+      </div>
+      <div id="statement-modal-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="modal-confirm" class="modal-overlay">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3 id="confirm-title">Confirm</h3>
+        <button class="icon-btn" onclick="closeModal('modal-confirm')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-message">Are you sure?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('modal-confirm')" data-i18n="cancel">Cancel</button>
+        <button id="confirm-yes-btn" class="btn btn-danger">Yes, Proceed</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Core Scripts -->
+  <script src="/static/js/i18n.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/dashboard.js"></script>
+  <script src="/static/js/customers.js"></script>
+  <script src="/static/js/transactions.js"></script>
+  <script src="/static/js/expenses.js"></script>
+  <script src="/static/js/reports.js"></script>
+  <script src="/static/js/settings.js"></script>
+  <script src="/static/js/app.js"></script>
+
+</body>
+
+</html>
